@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MenuMain"
+    android:orientation="vertical"
+    android:gravity="center">
+
+    <Button
+        android:id="@+id/texto"
+        android:layout_gravity="center"
+        android:layout_width="120dp"
+        android:layout_height="65dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginBottom="5dp"
+        android:text="textos"/>
+    <Button
+        android:id="@+id/imagen"
+        android:layout_gravity="center"
+        android:layout_width="120dp"
+        android:layout_height="65dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginBottom="5dp"
+        android:text="imagenes"/>
+    <Button
+        android:id="@+id/audio"
+        android:layout_gravity="center"
+        android:layout_width="120dp"
+        android:layout_height="65dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginBottom="5dp"
+        android:text="audios"/>
+    <Button
+        android:id="@+id/video"
+        android:layout_gravity="center"
+        android:layout_width="120dp"
+        android:layout_height="65dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginBottom="5dp"
+        android:text="videos"/>
+
+</LinearLayout>
