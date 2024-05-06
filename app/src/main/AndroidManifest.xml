@@ -22,7 +22,7 @@
         android:theme="@style/Theme.MultimediaPabloRamdeViuGelpi"
         tools:targetApi="31">
         <activity
-            android:name=".Photos"
+            android:name=".Pictures"
             android:exported="false" />
         <activity
             android:name=".TakePhoto"
