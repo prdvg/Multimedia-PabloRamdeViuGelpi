@@ -48,7 +48,6 @@ class TakePhoto : AppCompatActivity() {
             val intent = Intent(this, MenuMain::class.java)
             startActivity(intent)
         }
-
         take.setOnClickListener {
             val builder = AlertDialog.Builder(this)
             builder.setMessage("¿Desea guardar esta imagen?")

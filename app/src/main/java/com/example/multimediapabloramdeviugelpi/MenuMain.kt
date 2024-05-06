@@ -3,6 +3,7 @@ package com.example.multimediapabloramdeviugelpi
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.provider.MediaStore
 import android.widget.Button
 
 class MenuMain : AppCompatActivity() {
@@ -19,7 +20,7 @@ class MenuMain : AppCompatActivity() {
             startActivity(intent)
         }
         imagen.setOnClickListener(){
-            val intent = Intent(this, TakePhoto::class.java)
+            val intent = Intent(this, Photos::class.java)
             startActivity(intent)
         }
     }
