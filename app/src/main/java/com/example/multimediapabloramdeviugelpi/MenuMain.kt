@@ -22,5 +22,9 @@ class MenuMain : AppCompatActivity() {
             val intent = Intent(this, Pictures::class.java)
             startActivity(intent)
         }
+        audio.setOnClickListener{
+            val intent = Intent(this, MakeAudio::class.java)
+            startActivity(intent)
+        }
     }
 }
