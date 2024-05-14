@@ -1,7 +1,9 @@
 package com.example.multimediapabloramdeviugelpi
 
+import android.content.ContentResolver
 import android.content.Intent
 import android.graphics.Typeface
+import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Environment
@@ -18,10 +20,12 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import org.w3c.dom.Text
+import java.io.BufferedReader
 import java.io.BufferedWriter
 import java.io.File
 import java.io.FileWriter
 import java.io.IOException
+import java.io.InputStreamReader
 import java.time.format.TextStyle
 
 class TextEdit : AppCompatActivity() {
@@ -30,6 +34,7 @@ class TextEdit : AppCompatActivity() {
     private var SApply = false
     private var saved: Boolean = false
     private var textSize = 1.0f
+    private val PICK_FILE_REQUEST_CODE = 100
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_text_edit)
@@ -42,6 +47,11 @@ class TextEdit : AppCompatActivity() {
         var incSize = findViewById<TextView>(R.id.incSize)
         var decSize = findViewById<TextView>(R.id.decSize)
         var texto = findViewById<EditText>(R.id.docText)
+        val openFileButton = findViewById<Button>(R.id.openFileButton)
+
+        openFileButton.setOnClickListener {
+            openFilePicker()
+        }
 
         back.setOnClickListener(){
             volver()
@@ -225,5 +235,41 @@ class TextEdit : AppCompatActivity() {
             Toast.makeText(this, "Error al guardar el archivo", Toast.LENGTH_SHORT).show()
             e.printStackTrace()
         }
+    }
+    private fun openFilePicker() {
+        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+            addCategory(Intent.CATEGORY_OPENABLE)
+            type = "text/plain"
+        }
+        startActivityForResult(intent, PICK_FILE_REQUEST_CODE)
+    }
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == PICK_FILE_REQUEST_CODE && resultCode == RESULT_OK) {
+            data?.data?.also { uri ->
+                readTextFromUri(uri)?.let { text ->
+                    findViewById<EditText>(R.id.docText).setText(text)
+                }
+            }
+        }
+    }
+    private fun readTextFromUri(uri: Uri): String? {
+        val contentResolver: ContentResolver = contentResolver
+        val stringBuilder = StringBuilder()
+        try {
+            contentResolver.openInputStream(uri)?.use { inputStream ->
+                BufferedReader(InputStreamReader(inputStream)).use { reader ->
+                    var line: String? = reader.readLine()
+                    while (line != null) {
+                        stringBuilder.append(line).append('\n')
+                        line = reader.readLine()
+                    }
+                }
+            }
+        } catch (e: IOException) {
+            e.printStackTrace()
+            Toast.makeText(this, "Error al leer el archivo", Toast.LENGTH_SHORT).show()
+        }
+        return stringBuilder.toString()
     }
 }

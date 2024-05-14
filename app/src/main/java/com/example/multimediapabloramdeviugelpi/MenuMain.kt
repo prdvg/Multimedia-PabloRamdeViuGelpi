@@ -26,5 +26,9 @@ class MenuMain : AppCompatActivity() {
             val intent = Intent(this, MakeAudio::class.java)
             startActivity(intent)
         }
+        video.setOnClickListener{
+            val intent = Intent(this, FilmVideo::class.java)
+            startActivity(intent)
+        }
     }
 }
