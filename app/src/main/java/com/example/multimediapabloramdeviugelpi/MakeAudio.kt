@@ -1,7 +1,8 @@
 package com.example.multimediapabloramdeviugelpi
 
 import android.app.Activity
-import android.content.ContentValues
+import android.app.AlertDialog
+import android.content.DialogInterface
 import android.content.Intent
 import android.media.MediaPlayer
 import android.net.Uri
@@ -9,14 +10,13 @@ import android.os.Bundle
 import android.os.Environment
 import android.provider.MediaStore
 import android.widget.Button
+import android.widget.EditText
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import java.io.File
-import java.io.FileInputStream
 import java.io.FileOutputStream
-import java.io.IOException
 
 class MakeAudio : AppCompatActivity() {
 
@@ -38,6 +38,7 @@ class MakeAudio : AppCompatActivity() {
         grabar = findViewById(R.id.recordAudio)
         pickAudio = findViewById(R.id.selectAudio)
 
+        createAudioFolderIfNeeded()
         back.setOnClickListener {
             finish()
         }
@@ -59,10 +60,17 @@ class MakeAudio : AppCompatActivity() {
         if (result.resultCode == Activity.RESULT_OK) {
             val data: Intent? = result.data
             val uri = data?.data
-            if(uri != null){
+            if (uri != null) {
                 currentAudioUri = uri
             }
         }
+    }
+
+    private fun playAudio(uri: Uri) {
+        val intent = Intent(Intent.ACTION_VIEW)
+        intent.setDataAndType(uri, "audio/*")
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        startActivity(intent)
     }
 
     private fun pickAudio() {
@@ -80,15 +88,43 @@ class MakeAudio : AppCompatActivity() {
     }
 
     private fun saveAudio() {
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle("Guardar audio")
+        builder.setMessage("¿Desea guardar el audio?")
+
+        val input = EditText(this)
+        input.hint = "Nombre del archivo"
+        builder.setView(input)
+
+        builder.setPositiveButton("Sí") { dialog, which ->
+            val fileName = input.text.toString().trim()
+            if (fileName.isNotEmpty()) {
+                saveAudioToFile(fileName)
+            } else {
+                Toast.makeText(this, "El nombre del archivo no puede estar vacío", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        builder.setNegativeButton("No") { dialog, which ->
+            dialog.dismiss()
+        }
+
+        builder.show()
+    }
+
+    private fun saveAudioToFile(fileName: String) {
         currentAudioUri?.let { uri ->
             val inputStream = contentResolver.openInputStream(uri)
-            val fileName = "${System.currentTimeMillis()}.mp3"
-            val audioFile = File(getExternalFilesDir(Environment.DIRECTORY_MUSIC), fileName)
+            val audioFolder = File(getExternalFilesDir(Environment.DIRECTORY_MUSIC), "Audios")
+            if (!audioFolder.exists()) {
+                audioFolder.mkdirs()
+            }
+            val audioFile = File(audioFolder, "$fileName.mp3")
             inputStream?.use { input ->
                 FileOutputStream(audioFile).use { output ->
                     input.copyTo(output)
                 }
-                Toast.makeText(this, "Audio guardado en la carpeta de Música", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Audio guardado en: ${audioFile.absolutePath}", Toast.LENGTH_LONG).show()
             }
         } ?: run {
             Toast.makeText(this, "No se ha seleccionado ningún audio para guardar", Toast.LENGTH_SHORT).show()
@@ -112,6 +148,13 @@ class MakeAudio : AppCompatActivity() {
                     currentAudioUri = uri
                 }
             }
+        }
+    }
+
+    private fun createAudioFolderIfNeeded() {
+        val audioFolder = File(getExternalFilesDir(Environment.DIRECTORY_MUSIC), "Audios")
+        if (!audioFolder.exists()) {
+            audioFolder.mkdirs()
         }
     }
 }

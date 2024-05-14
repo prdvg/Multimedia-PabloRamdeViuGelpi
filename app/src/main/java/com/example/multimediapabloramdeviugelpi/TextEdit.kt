@@ -58,7 +58,7 @@ class TextEdit : AppCompatActivity() {
         }
         save.setOnClickListener(){
             if(name.text!=null){
-                val fich = texto.text.toString()
+                val fich = name.text.toString()
                 guardarArchivo(fich)
             }else{
                 Toast.makeText(this, "debe de ponerle un nombre al archivo", Toast.LENGTH_LONG).show()
@@ -222,7 +222,9 @@ class TextEdit : AppCompatActivity() {
     }
     private fun guardarArchivo(nombreArchivo: String) {
         val downloadsDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
-        val file = File(downloadsDirectory, "$nombreArchivo.txt")
+
+        val extension = obtenerExtension(nombreArchivo)
+        val file = File(downloadsDirectory, "$nombreArchivo")
 
         try {
             val fileWriter = FileWriter(file)
@@ -234,6 +236,15 @@ class TextEdit : AppCompatActivity() {
         } catch (e: IOException) {
             Toast.makeText(this, "Error al guardar el archivo", Toast.LENGTH_SHORT).show()
             e.printStackTrace()
+        }
+    }
+
+    private fun obtenerExtension(nombreArchivo: String): String {
+        val puntoIndex = nombreArchivo.lastIndexOf('.')
+        return if (puntoIndex != -1) {
+            nombreArchivo/*.substring(puntoIndex)*/
+        } else {
+            ".txt"
         }
     }
     private fun openFilePicker() {
