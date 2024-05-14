@@ -2,7 +2,7 @@ package com.example.multimediapabloramdeviugelpi
 
 import android.app.Activity
 import android.app.AlertDialog
-import android.content.DialogInterface
+import android.content.ContentValues
 import android.content.Intent
 import android.media.MediaPlayer
 import android.net.Uri
@@ -15,8 +15,9 @@ import android.widget.ImageView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import java.io.File
 import java.io.FileOutputStream
+import java.io.IOException
+import java.io.InputStream
 
 class MakeAudio : AppCompatActivity() {
 
@@ -38,7 +39,6 @@ class MakeAudio : AppCompatActivity() {
         grabar = findViewById(R.id.recordAudio)
         pickAudio = findViewById(R.id.selectAudio)
 
-        createAudioFolderIfNeeded()
         back.setOnClickListener {
             finish()
         }
@@ -62,14 +62,16 @@ class MakeAudio : AppCompatActivity() {
             val uri = data?.data
             if (uri != null) {
                 currentAudioUri = uri
+                playAudio(uri) // Reproduce el audio seleccionado
             }
         }
     }
 
     private fun playAudio(uri: Uri) {
-        val intent = Intent(Intent.ACTION_VIEW)
-        intent.setDataAndType(uri, "audio/*")
-        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        val intent = Intent(Intent.ACTION_VIEW).apply {
+            setDataAndType(uri, "audio/*")
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        }
         startActivity(intent)
     }
 
@@ -114,21 +116,45 @@ class MakeAudio : AppCompatActivity() {
 
     private fun saveAudioToFile(fileName: String) {
         currentAudioUri?.let { uri ->
-            val inputStream = contentResolver.openInputStream(uri)
-            val audioFolder = File(getExternalFilesDir(Environment.DIRECTORY_MUSIC), "Audios")
-            if (!audioFolder.exists()) {
-                audioFolder.mkdirs()
-            }
-            val audioFile = File(audioFolder, "$fileName.mp3")
-            inputStream?.use { input ->
-                FileOutputStream(audioFile).use { output ->
-                    input.copyTo(output)
+            try {
+                val inputStream = contentResolver.openInputStream(uri)
+                inputStream?.use { input ->
+                    val audioUri = saveAudioToMusicFolder(fileName, input)
+                    if (audioUri != null) {
+                        Toast.makeText(this, "Audio guardado en: ${audioUri.path}", Toast.LENGTH_LONG).show()
+                        playAudio(audioUri) // Reproduce el audio guardado
+                    } else {
+                        Toast.makeText(this, "Error al guardar el audio", Toast.LENGTH_SHORT).show()
+                    }
                 }
-                Toast.makeText(this, "Audio guardado en: ${audioFile.absolutePath}", Toast.LENGTH_LONG).show()
+            } catch (e: IOException) {
+                Toast.makeText(this, "Error al guardar el audio", Toast.LENGTH_SHORT).show()
+                e.printStackTrace()
             }
         } ?: run {
             Toast.makeText(this, "No se ha seleccionado ningún audio para guardar", Toast.LENGTH_SHORT).show()
         }
+    }
+
+    private fun saveAudioToMusicFolder(fileName: String, inputStream: InputStream): Uri? {
+        val contentValues = ContentValues().apply {
+            put(MediaStore.Audio.Media.DISPLAY_NAME, "$fileName.mp3")
+            put(MediaStore.Audio.Media.MIME_TYPE, "audio/mpeg")
+            put(MediaStore.Audio.Media.RELATIVE_PATH, Environment.DIRECTORY_MUSIC)
+        }
+
+        val resolver = contentResolver
+        val audioCollection = MediaStore.Audio.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY)
+        val audioUri = resolver.insert(audioCollection, contentValues)
+
+        if (audioUri != null) {
+            resolver.openOutputStream(audioUri)?.use { outputStream ->
+                inputStream.copyTo(outputStream)
+            }
+            return audioUri
+        }
+
+        return null
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -141,20 +167,15 @@ class MakeAudio : AppCompatActivity() {
             PICK_AUDIO_REQUEST_CODE -> {
                 data?.data?.let { uri ->
                     currentAudioUri = uri
+                    playAudio(uri) // Reproduce el audio seleccionado
                 }
             }
             RECORD_AUDIO_REQUEST_CODE -> {
                 data?.data?.let { uri ->
                     currentAudioUri = uri
+                    playAudio(uri) // Reproduce el audio grabado
                 }
             }
-        }
-    }
-
-    private fun createAudioFolderIfNeeded() {
-        val audioFolder = File(getExternalFilesDir(Environment.DIRECTORY_MUSIC), "Audios")
-        if (!audioFolder.exists()) {
-            audioFolder.mkdirs()
         }
     }
 }
