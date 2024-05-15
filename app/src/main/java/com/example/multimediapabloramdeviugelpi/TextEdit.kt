@@ -59,7 +59,7 @@ class TextEdit : AppCompatActivity() {
         save.setOnClickListener(){
             if(name.text!=null){
                 val fich = name.text.toString()
-                guardarArchivo(fich)
+                guardarArchivo(fich, texto.text.toString())
             }else{
                 Toast.makeText(this, "debe de ponerle un nombre al archivo", Toast.LENGTH_LONG).show()
             }
@@ -220,16 +220,22 @@ class TextEdit : AppCompatActivity() {
         spannable.setSpan(RelativeSizeSpan(textSize), 0, editableText.length, 0)
         editText.text = spannable
     }
-    private fun guardarArchivo(nombreArchivo: String) {
+    private fun guardarArchivo(nombreArchivo: String, texto: String) {
         val downloadsDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
 
         val extension = obtenerExtension(nombreArchivo)
-        val file = File(downloadsDirectory, "$nombreArchivo")
+        val file: File;
+        if(extension==nombreArchivo){
+            file = File(downloadsDirectory, "$nombreArchivo")
+        }else{
+            file = File(downloadsDirectory, "$extension")
+        }
+
 
         try {
             val fileWriter = FileWriter(file)
             val bufferedWriter = BufferedWriter(fileWriter)
-            bufferedWriter.write(nombreArchivo)
+            bufferedWriter.write(texto)
             bufferedWriter.close()
 
             Toast.makeText(this, "Archivo guardado correctamente", Toast.LENGTH_SHORT).show()
@@ -239,14 +245,25 @@ class TextEdit : AppCompatActivity() {
         }
     }
 
-    private fun obtenerExtension(nombreArchivo: String): String {
+    /*private fun obtenerExtension(nombreArchivo: String): String {
         val puntoIndex = nombreArchivo.lastIndexOf('.')
         return if (puntoIndex != -1) {
             nombreArchivo/*.substring(puntoIndex)*/
         } else {
             ".txt"
         }
+    }*/
+    private fun obtenerExtension(nombreArchivo: String): String {
+        val puntoIndex = nombreArchivo.lastIndexOf('.')
+        return if (puntoIndex != -1 && puntoIndex < nombreArchivo.length - 1) {
+            nombreArchivo.substring(puntoIndex)
+            nombreArchivo + "." + puntoIndex
+        } else {
+            "$nombreArchivo.txt"
+        }
     }
+
+
     private fun openFilePicker() {
         val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
             addCategory(Intent.CATEGORY_OPENABLE)

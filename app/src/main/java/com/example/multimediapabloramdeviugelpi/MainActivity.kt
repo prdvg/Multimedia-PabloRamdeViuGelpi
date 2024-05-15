@@ -44,14 +44,14 @@ class MainActivity : AppCompatActivity() {
             )
         } else {
             Log.d("MainActivity", "Todos los permisos ya están concedidos.")
-            startMenuMain()
+            //startMenuMain()
         }
 
-        /*pantalla.setOnTouchListener { v, event ->
+        pantalla.setOnTouchListener { v, event ->
             val intent = Intent(this, MenuMain::class.java)
             startActivity(intent)
             true
-        }*/
+        }
     }
 
     override fun onRequestPermissionsResult(

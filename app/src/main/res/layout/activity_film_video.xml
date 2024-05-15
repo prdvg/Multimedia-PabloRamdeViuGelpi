@@ -10,7 +10,9 @@
     <ImageView
         android:id="@+id/selectVideoButton"
         android:layout_width="200dp"
-        android:layout_height="200dp"/>
+        android:layout_height="200dp"
+        android:src="@drawable/pickfile"
+        android:layout_marginBottom="20dp"/>
     <Button
         android:id="@+id/recordVideoButton"
         android:layout_width="wrap_content"
